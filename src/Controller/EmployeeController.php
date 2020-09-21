@@ -11,11 +11,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * @Route("/api")
+ */
 class EmployeeController extends AbstractController
 {
 
     /**
-     * @Route("/api/addEmployee", name="api_add_employee", methods={"POST"})
+     * @Route("/addEmployee", name="api_add_employee", methods={"POST"})
      * @param Request $request
      * @param SerializerInterface $serializer
      * @param EntityManagerInterface $em

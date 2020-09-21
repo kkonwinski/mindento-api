@@ -35,7 +35,7 @@ class DelegationCountry
     private $currency;
 
     /**
-     * @ORM\OneToMany(targetEntity=Delegation::class, mappedBy="dalegationCountry")
+     * @ORM\OneToMany(targetEntity=Delegation::class, mappedBy="delegationCountry")
      */
     private $delegation;
 

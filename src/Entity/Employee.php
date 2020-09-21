@@ -16,8 +16,6 @@ class Employee
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
-     * @Groups({"post"})
-
      * @ORM\Column(type="integer")
      */
     public $id;
