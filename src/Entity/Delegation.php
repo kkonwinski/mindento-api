@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\DelegationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -11,7 +12,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Delegation
 {
+    public function __construct()
+    {
+        $this->setIsFinish(false);
+    }
+
     /**
+     * @Groups("delegation")
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -31,6 +38,7 @@ class Delegation
     private $finishDelegation;
 
     /**
+     * @Groups("delegation")
      * @ORM\ManyToOne(targetEntity=DelegationCountry::class, inversedBy="delegation")
      * @Assert\NotBlank
      */

@@ -8,6 +8,7 @@ use App\Entity\Employee;
 use App\Repository\DelegationCountryRepository;
 use App\Repository\EmployeeRepository;
 use DateTime;
+use Doctrine\Migrations\Configuration\Migration\Exception\JsonNotValid;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,15 +32,23 @@ class DelegationController extends AbstractController
     /**
      * @var SerializerInterface
      */
+    private $delegationCountry;
+    private $delegation;
+    /**
+     * @var SerializerInterface
+     */
     private $serializer;
 
-    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository)
-    {
 
+    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository,SerializerInterface $serializer)
+    {
+        $this->delegationCountry = new Delegation();
+        $this->delegation = new Delegation();
         $this->em = $em;
         $this->validator = $validator;
         $this->employeeRepository = $employeeRepository;
         $this->delegationCountryRepository = $delegationCountryRepository;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -63,38 +72,43 @@ class DelegationController extends AbstractController
         $data = $request->getContent();
 
         $delegation = new Delegation();
+      //  $delegation = $this->serializer->deserialize($data, Delegation::class, 'json');
 
-        $parametersAsArray = json_decode($data);
-        $delegationCountry = $this->delegationCountryRepository->findCountryByName($parametersAsArray->country);
+
+        $requestParameters = json_decode($data);
+        $delegationCountry = $this->delegationCountryRepository->findCountryByName($requestParameters->country);
         $delegation->setDelegationCountry($delegationCountry);
 
 
-        $delegationEmployee = $this->employeeRepository->find(["id" => $parametersAsArray->employeeId]);
+        $delegationEmployee = $this->employeeRepository->find(["id" => $requestParameters->employeeId]);
         $delegation->setEmployee($delegationEmployee);
 
 
-        $startDate = $delegation->createDateTimeFormat($parametersAsArray->start);
+        $startDate = $delegation->createDateTimeFormat($requestParameters->start);
         $delegation->setStartDelegation($startDate);
 
 
-        $finishDate = $delegation->createDateTimeFormat($parametersAsArray->end);
+        $finishDate = $delegation->createDateTimeFormat($requestParameters->end);
         $delegation->setFinishDelegation($finishDate);
 
         $delegation->setIsFinish(false);
-        $errors = $this->validator->validate($delegation);
-
-        if (count($errors) > 0) {
-            $errorsString = (string)$errors;
-            return new Response($errorsString);
-        }
+//        $errors = $this->validator->validate($delegation);
+//
+//        if (count($errors) > 0) {
+//            $errorsString = (string)$errors;
+//            return new Response($errorsString);
+//        }
         try {
             $this->em->persist($delegation);
             $this->em->flush();
+            return $this->json([
+                'message'=>'Delegate created11!!!'
+                ],201);
 
-            return $this->json($delegation, 201);
 
         } catch (NotEncodableValueException $valueException) {
             return $this->json(['status' => 400, 'message' => $valueException->getMessage()], 400);
         }
     }
+
 }

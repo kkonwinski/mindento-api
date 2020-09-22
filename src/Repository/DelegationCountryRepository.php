@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\DelegationCountry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,19 +22,19 @@ class DelegationCountryRepository extends ServiceEntityRepository
         parent::__construct($registry, DelegationCountry::class);
     }
 
-     /**
-      * @return DelegationCountry[] Returns an array of DelegationCountry objects
-      */
+    /**
+     * @param string $value
+     * @return DelegationCountry[] Returns an array of DelegationCountry objects
+     */
 
-    public function findCountryByName($value)
+    public function findCountryByName(string $value)
     {
         return $this->createQueryBuilder('d')
             ->select('d')
             ->where('d.country=:val')
             ->setParameter('val', $value)
             ->getQuery()
-            ->getResult()[0]
-        ;
+            ->getResult()[0];
     }
 
 

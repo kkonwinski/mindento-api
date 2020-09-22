@@ -6,6 +6,8 @@ use App\Repository\DelegationCountryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=DelegationCountryRepository::class)
@@ -13,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 class DelegationCountry
 {
     /**
+     * @Groups("delegation_country")
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -20,6 +23,7 @@ class DelegationCountry
     private $id;
 
     /**
+     * @Assert\NotBlank
      * @ORM\Column(type="string", length=255)
      */
     private $country;
@@ -35,6 +39,7 @@ class DelegationCountry
     private $currency;
 
     /**
+     * @Groups("delegation_detail")
      * @ORM\OneToMany(targetEntity=Delegation::class, mappedBy="delegationCountry")
      */
     private $delegation;
