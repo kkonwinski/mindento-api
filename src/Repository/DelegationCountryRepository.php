@@ -4,6 +4,8 @@ namespace App\Repository;
 
 use App\Entity\DelegationCountry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,22 +21,21 @@ class DelegationCountryRepository extends ServiceEntityRepository
         parent::__construct($registry, DelegationCountry::class);
     }
 
-    // /**
-    //  * @return DelegationCountry[] Returns an array of DelegationCountry objects
-    //  */
-    /*
-    public function findByExampleField($value)
+     /**
+      * @return DelegationCountry[] Returns an array of DelegationCountry objects
+      */
+
+    public function findCountryByName($value)
     {
         return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
+            ->select('d')
+            ->where('d.country=:val')
             ->setParameter('val', $value)
-            ->orderBy('d.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
-            ->getResult()
+            ->getResult()[0]
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?DelegationCountry

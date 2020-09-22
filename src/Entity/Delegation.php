@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\DelegationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=DelegationRepository::class)
@@ -19,16 +20,19 @@ class Delegation
 
     /**
      * @ORM\Column(type="datetime")
+     * @Assert\NotBlank
      */
     private $startDelegation;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
+     * @Assert\NotBlank
      */
     private $finishDelegation;
 
     /**
      * @ORM\ManyToOne(targetEntity=DelegationCountry::class, inversedBy="delegation")
+     * @Assert\NotBlank
      */
     private $delegationCountry;
 
@@ -105,5 +109,15 @@ class Delegation
         $this->isFinish = $isFinish;
 
         return $this;
+    }
+
+
+    /**
+     * @param string $time
+     * @return \DateTime
+     */
+    public function createDateTimeFormat(string $time): \DateTime
+    {
+        return \DateTime::createFromFormat('Y-m-d H:i:s', $time);
     }
 }

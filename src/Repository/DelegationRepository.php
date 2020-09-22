@@ -20,7 +20,7 @@ class DelegationRepository extends ServiceEntityRepository
     }
 
     // /**
-    //  * @return Delegation[] Returns an array of Delegation objects
+    //  * @return GetSetDelegationParams[] Returns an array of GetSetDelegationParams objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class DelegationRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?Delegation
+    public function findOneBySomeField($value): ?GetSetDelegationParams
     {
         return $this->createQueryBuilder('d')
             ->andWhere('d.exampleField = :val')
