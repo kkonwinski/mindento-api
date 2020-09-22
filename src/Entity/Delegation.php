@@ -29,20 +29,20 @@ class Delegation
      * @ORM\Column(type="datetime")
      * @Assert\NotBlank
      */
-    private $startDelegation;
+    private $start;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      * @Assert\NotBlank
      */
-    private $finishDelegation;
+    private $end;
 
     /**
      * @Groups("delegation")
      * @ORM\ManyToOne(targetEntity=DelegationCountry::class, inversedBy="delegation")
      * @Assert\NotBlank
      */
-    private $delegationCountry;
+    private $country;
 
     /**
      * @ORM\ManyToOne(targetEntity=Employee::class, inversedBy="delegations")
@@ -59,41 +59,9 @@ class Delegation
         return $this->id;
     }
 
-    public function getStartDelegation(): ?\DateTimeInterface
-    {
-        return $this->startDelegation;
-    }
 
-    public function setStartDelegation(\DateTimeInterface $startDelegation): self
-    {
-        $this->startDelegation = $startDelegation;
 
-        return $this;
-    }
 
-    public function getFinishDelegation(): ?\DateTimeInterface
-    {
-        return $this->finishDelegation;
-    }
-
-    public function setFinishDelegation(?\DateTimeInterface $finishDelegation): self
-    {
-        $this->finishDelegation = $finishDelegation;
-
-        return $this;
-    }
-
-    public function getDelegationCountry(): ?delegationCountry
-    {
-        return $this->delegationCountry;
-    }
-
-    public function setDelegationCountry(?delegationCountry $delegationCountry): self
-    {
-        $this->delegationCountry = $delegationCountry;
-
-        return $this;
-    }
 
     public function getEmployee(): ?Employee
     {
@@ -119,6 +87,30 @@ class Delegation
         return $this;
     }
 
+    public function getStart(): ?\DateTimeInterface
+    {
+        return $this->start;
+    }
+
+    public function setStart(\DateTimeInterface $start): self
+    {
+        $this->start = $start;
+
+        return $this;
+    }
+
+    public function getEnd(): ?\DateTimeInterface
+    {
+        return $this->end;
+    }
+
+    public function setEnd(?\DateTimeInterface $end): self
+    {
+        $this->end = $end;
+
+        return $this;
+    }
+
 
     /**
      * @param string $time
@@ -127,5 +119,17 @@ class Delegation
     public function createDateTimeFormat(string $time): \DateTime
     {
         return \DateTime::createFromFormat('Y-m-d H:i:s', $time);
+    }
+
+    public function getCountry(): ?DelegationCountry
+    {
+        return $this->country;
+    }
+
+    public function setCountry(?DelegationCountry $country): self
+    {
+        $this->country = $country;
+
+        return $this;
     }
 }

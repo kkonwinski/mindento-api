@@ -12,6 +12,7 @@ use Doctrine\Migrations\Configuration\Migration\Exception\JsonNotValid;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
@@ -70,26 +71,19 @@ class DelegationController extends AbstractController
     public function add(Request $request)
     {
         $data = $request->getContent();
-
-        $delegation = new Delegation();
-      //  $delegation = $this->serializer->deserialize($data, Delegation::class, 'json');
+     //   $delegation = new Delegation();
+        $delegation = $this->serializer->deserialize($data, Delegation::class, 'json');
 
 
         $requestParameters = json_decode($data);
+
         $delegationCountry = $this->delegationCountryRepository->findCountryByName($requestParameters->country);
-        $delegation->setDelegationCountry($delegationCountry);
+        $delegation->setCountry($delegationCountry);
 
 
         $delegationEmployee = $this->employeeRepository->find(["id" => $requestParameters->employeeId]);
         $delegation->setEmployee($delegationEmployee);
-
-
-        $startDate = $delegation->createDateTimeFormat($requestParameters->start);
-        $delegation->setStartDelegation($startDate);
-
-
-        $finishDate = $delegation->createDateTimeFormat($requestParameters->end);
-        $delegation->setFinishDelegation($finishDate);
+        $requestParameters = json_encode($data);
 
         $delegation->setIsFinish(false);
 //        $errors = $this->validator->validate($delegation);
@@ -102,7 +96,7 @@ class DelegationController extends AbstractController
             $this->em->persist($delegation);
             $this->em->flush();
             return $this->json([
-                'message'=>'Delegate created11!!!'
+                'message'=>'Delegate created!!!'
                 ],201);
 
 
