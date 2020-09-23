@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Delegation;
+use App\Entity\Employee;
 use App\Repository\DelegationCountryRepository;
+use App\Repository\DelegationRepository;
 use App\Repository\EmployeeRepository;
 use App\Service\ApiDelegationActions;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,7 +13,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -27,16 +31,27 @@ class DelegationController extends AbstractController
     private $delegationCountryRepository;
     private $serializer;
     private $delegationActions;
+    /**
+     * @var DelegationRepository
+     */
+    private $delegationRepository;
+    /**
+     * @var NormalizerInterface
+     */
+    private $normalizer;
 
 
-    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, SerializerInterface $serializer, ApiDelegationActions $delegationActions)
+    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, ApiDelegationActions $delegationActions, DelegationRepository $delegationRepository, NormalizerInterface $normalizer, SerializerInterface $serializer)
     {
         $this->em = $em;
         $this->validator = $validator;
         $this->employeeRepository = $employeeRepository;
         $this->delegationCountryRepository = $delegationCountryRepository;
-        $this->serializer = $serializer;
         $this->delegationActions = $delegationActions;
+
+        $this->delegationRepository = $delegationRepository;
+        $this->normalizer = $normalizer;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -59,7 +74,6 @@ class DelegationController extends AbstractController
     {
         try {
             $data = $request->getContent();
-            //   $delegation = new Delegation();
             $delegation = $this->serializer->deserialize($data, Delegation::class, 'json');
 
 
@@ -96,6 +110,25 @@ class DelegationController extends AbstractController
     {
         $delegationCountry = $this->delegationCountryRepository->findCountryByName($delegationCountry);
         $delegation->setCountry($delegationCountry);
+    }
+
+    /**
+     * @Route("/showEmployeeDelegations/{id}", name="show_employee_delegations", methods={"GET"})
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     */
+    public function showAllEmployeeDelegations($id,SerializerInterface $serializer)
+    {
+        $employeeDelegations = $this->delegationRepository->findBy(["employee" => $id]);
+
+
+        $json = $serializer->serialize(
+            $employeeDelegations,
+            'json',
+            ['groups' => 'd']
+        );
+
+dd($json);
+        //    return $this->json($employeeDelegations, 200, [], ['groups' => "d"]);
     }
 
 }
