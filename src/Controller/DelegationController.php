@@ -3,19 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Delegation;
-use App\Entity\DelegationCountry;
-use App\Entity\Employee;
 use App\Repository\DelegationCountryRepository;
 use App\Repository\EmployeeRepository;
-use DateTime;
-use Doctrine\Migrations\Configuration\Migration\Exception\JsonNotValid;
+use App\Service\ApiDelegationActions;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,26 +25,18 @@ class DelegationController extends AbstractController
     private $validator;
     private $employeeRepository;
     private $delegationCountryRepository;
-    /**
-     * @var SerializerInterface
-     */
-    private $delegationCountry;
-    private $delegation;
-    /**
-     * @var SerializerInterface
-     */
     private $serializer;
+    private $delegationActions;
 
 
-    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository,SerializerInterface $serializer)
+    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, SerializerInterface $serializer, ApiDelegationActions $delegationActions)
     {
-        $this->delegationCountry = new Delegation();
-        $this->delegation = new Delegation();
         $this->em = $em;
         $this->validator = $validator;
         $this->employeeRepository = $employeeRepository;
         $this->delegationCountryRepository = $delegationCountryRepository;
         $this->serializer = $serializer;
+        $this->delegationActions = $delegationActions;
     }
 
     /**
@@ -70,37 +57,33 @@ class DelegationController extends AbstractController
      */
     public function add(Request $request)
     {
-        $data = $request->getContent();
-     //   $delegation = new Delegation();
-        $delegation = $this->serializer->deserialize($data, Delegation::class, 'json');
-
-
-        $requestParameters = json_decode($data);
-
-        $delegationCountry = $this->delegationCountryRepository->findCountryByName($requestParameters->country);
-        $delegation->setCountry($delegationCountry);
-
-
-        $delegationEmployee = $this->employeeRepository->find(["id" => $requestParameters->employeeId]);
-        $delegation->setEmployee($delegationEmployee);
-        $requestParameters = json_encode($data);
-
-        $delegation->setIsFinish(false);
-//        $errors = $this->validator->validate($delegation);
-//
-//        if (count($errors) > 0) {
-//            $errorsString = (string)$errors;
-//            return new Response($errorsString);
-//        }
         try {
+            $data = $request->getContent();
+            //   $delegation = new Delegation();
+            $delegation = $this->serializer->deserialize($data, Delegation::class, 'json');
+
+
+            $requestParameters = json_decode($data);
+
+            $delegationCountry = $this->delegationCountryRepository->findCountryByName($requestParameters->country);
+            $delegation->setCountry($delegationCountry);
+
+
+            $delegationEmployee = $this->employeeRepository->find(["id" => $requestParameters->employeeId]);
+            $this->delegationActions->isEmployeeOnDelegation($delegationEmployee);
+
+            $delegation->setEmployee($delegationEmployee);
+           $this->delegationActions->compareDelegationTimes($requestParameters->start, $requestParameters->end);
+
+
             $this->em->persist($delegation);
             $this->em->flush();
             return $this->json([
-                'message'=>'Delegate created!!!'
-                ],201);
+                'message' => 'Delegate created!!!'
+            ], 201);
 
 
-        } catch (NotEncodableValueException $valueException) {
+        } catch (\Exception $valueException) {
             return $this->json(['status' => 400, 'message' => $valueException->getMessage()], 400);
         }
     }

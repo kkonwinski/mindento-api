@@ -36,15 +36,16 @@ class DelegationRepository extends ServiceEntityRepository
     }
     */
 
-    /*
-    public function findOneBySomeField($value): ?GetSetDelegationParams
+
+    public function findEmployeeOnDelegation($value)
     {
         return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('d.isFinish=false')
+            ->andWhere('d.employee = :employee')
+            ->setParameter('employee', $value)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
+
     }
-    */
+
 }

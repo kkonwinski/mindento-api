@@ -18,7 +18,7 @@ class Delegation
     }
 
     /**
-     * @Groups("delegation")
+     * @Groups({"delegation"})
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -26,12 +26,14 @@ class Delegation
     private $id;
 
     /**
+     * @Groups({"delegation"})
      * @ORM\Column(type="datetime")
      * @Assert\NotBlank
      */
     private $start;
 
     /**
+     * @Groups({"delegation"})
      * @ORM\Column(type="datetime", nullable=true)
      * @Assert\NotBlank
      */
@@ -58,9 +60,6 @@ class Delegation
     {
         return $this->id;
     }
-
-
-
 
 
     public function getEmployee(): ?Employee
