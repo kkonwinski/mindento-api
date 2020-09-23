@@ -64,16 +64,15 @@ class DelegationController extends AbstractController
 
 
             $requestParameters = json_decode($data);
-
-            $delegationCountry = $this->delegationCountryRepository->findCountryByName($requestParameters->country);
-            $delegation->setCountry($delegationCountry);
+            $this->setDelegationCountry($requestParameters->country, $delegation);
 
 
             $delegationEmployee = $this->employeeRepository->find(["id" => $requestParameters->employeeId]);
             $this->delegationActions->isEmployeeOnDelegation($delegationEmployee);
-
             $delegation->setEmployee($delegationEmployee);
-           $this->delegationActions->compareDelegationTimes($requestParameters->start, $requestParameters->end);
+
+
+            $this->delegationActions->compareDelegationTimes($requestParameters->start, $requestParameters->end);
 
 
             $this->em->persist($delegation);
@@ -86,6 +85,17 @@ class DelegationController extends AbstractController
         } catch (\Exception $valueException) {
             return $this->json(['status' => 400, 'message' => $valueException->getMessage()], 400);
         }
+    }
+
+
+    /**
+     * @param string $delegationCountry
+     * @param Delegation $delegation
+     */
+    public function setDelegationCountry(string $delegationCountry, Delegation $delegation)
+    {
+        $delegationCountry = $this->delegationCountryRepository->findCountryByName($delegationCountry);
+        $delegation->setCountry($delegationCountry);
     }
 
 }
