@@ -48,4 +48,15 @@ class DelegationRepository extends ServiceEntityRepository
 
     }
 
+    public function findEmployeeDelegations($value)
+    {
+        return $this->createQueryBuilder('d')
+            ->andWhere('d.employee = :employee')
+            ->setParameter('employee', $value)
+            ->setMaxResults(4)
+            ->getQuery()
+            ->getResult();
+
+    }
+
 }

@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
+
 /**
  * @ORM\Entity(repositoryClass=DelegationRepository::class)
  */
@@ -18,7 +19,6 @@ class Delegation
     }
 
     /**
-     * @Groups({"delegation"})
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -26,21 +26,20 @@ class Delegation
     private $id;
 
     /**
-     * @Groups({"delegation"})
      * @ORM\Column(type="datetime")
      * @Assert\NotBlank
+     * @Groups("d")
      */
     private $start;
 
     /**
-     * @Groups({"delegation"})
      * @ORM\Column(type="datetime", nullable=true)
      * @Assert\NotBlank
+     * @Groups("d")
      */
     private $end;
 
     /**
-     * @Groups("delegation")
      * @ORM\ManyToOne(targetEntity=DelegationCountry::class, inversedBy="delegation")
      * @Assert\NotBlank
      */
