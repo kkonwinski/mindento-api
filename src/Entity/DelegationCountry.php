@@ -25,11 +25,13 @@ class DelegationCountry
     /**
      * @Assert\NotBlank
      * @ORM\Column(type="string", length=255)
+     * @Groups("d")
      */
     private $country;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups("d")
      */
     private $amountDoe;
 

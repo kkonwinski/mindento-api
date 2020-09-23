@@ -120,15 +120,15 @@ class DelegationController extends AbstractController
     {
         $employeeDelegations = $this->delegationRepository->findBy(["employee" => $id]);
 
+foreach ($employeeDelegations as $employeeDelegation){
+    $this->delegationActions->checkDiffTime($employeeDelegation->getStart(), $employeeDelegation->getEnd());
+}
+try {
 
-        $json = $serializer->serialize(
-            $employeeDelegations,
-            'json',
-            ['groups' => 'd']
-        );
 
-dd($json);
-        //    return $this->json($employeeDelegations, 200, [], ['groups' => "d"]);
+            return $this->json($employeeDelegations, 200, [], ['groups' => "d"]);
+        } catch (\Exception $valueException) {
+            return $this->json(['status' => 400, 'message' => $valueException->getMessage()], 400);
+        }
     }
-
 }

@@ -42,6 +42,7 @@ class Delegation
     /**
      * @ORM\ManyToOne(targetEntity=DelegationCountry::class, inversedBy="delegation")
      * @Assert\NotBlank
+     * @Groups("d")
      */
     private $country;
 
