@@ -57,7 +57,7 @@ class ApiDelegationActions
         $dayInHours = $dateDiff->days * 24;
         $hours = $dateDiff->h;
         $delegateTime = $dayInHours + $hours;
-        if ($delegateTime < 8) {
+        if ($delegateTime > 8) {
             return true;
         }
 
@@ -65,10 +65,9 @@ class ApiDelegationActions
 
     public function getNumberOfDelegateDays(\DateTimeInterface $startDate, \DateTimeInterface $endDate)
     {
-        $startNumber = (int)$startDate->format('N');
-        $endNumber = (int)$endDate->format('N');
-
-        $daysBetweenStartAndEnd = $endDate->diff($startDate)->days;
+        $startNumber = (int)$startDate->format('Y-m-d H:i:s');
+        $endNumber = (int)$endDate->format('Y-m-d H:i:s');
+        $daysBetweenStartAndEnd = $this->countCalendarDaysDelegation($startDate, $endDate);
 
         $weekendDays = (int)round($daysBetweenStartAndEnd / 7) * 2;
 
@@ -79,5 +78,21 @@ class ApiDelegationActions
     public function getDelegateNumberDaysWithoutWeekend(int $delegateDays, int $weekendDays): int
     {
         return $delegateDays - $weekendDays;
+    }
+
+    public function countCalendarDaysDelegation(\DateTimeInterface $startDate, \DateTimeInterface $endDate)
+    {
+
+        return $endDate->diff($startDate)->days;
+    }
+
+    public function calculateDoeAmountDelegation($calendarDays,$amountDoe)
+    {
+        return $calendarDays + (($calendarDays - 7) * $amountDoe * 2);
+    }
+    
+    public function formatDate($date){
+        return $date->format('Y-m-d H:i:s');
+
     }
 }

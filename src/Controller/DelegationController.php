@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Delegation;
-use App\Entity\Employee;
 use App\Repository\DelegationCountryRepository;
 use App\Repository\DelegationRepository;
 use App\Repository\EmployeeRepository;
@@ -12,10 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Exception\NotEncodableValueException;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -31,39 +27,20 @@ class DelegationController extends AbstractController
     private $delegationCountryRepository;
     private $serializer;
     private $delegationActions;
-    /**
-     * @var DelegationRepository
-     */
     private $delegationRepository;
-    /**
-     * @var NormalizerInterface
-     */
-    private $normalizer;
 
 
-    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, ApiDelegationActions $delegationActions, DelegationRepository $delegationRepository, NormalizerInterface $normalizer, SerializerInterface $serializer)
+    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, ApiDelegationActions $delegationActions, DelegationRepository $delegationRepository , SerializerInterface $serializer)
     {
         $this->em = $em;
         $this->validator = $validator;
         $this->employeeRepository = $employeeRepository;
         $this->delegationCountryRepository = $delegationCountryRepository;
         $this->delegationActions = $delegationActions;
-
         $this->delegationRepository = $delegationRepository;
-        $this->normalizer = $normalizer;
         $this->serializer = $serializer;
     }
 
-    /**
-     * @Route("/delegation", name="delegation")
-     */
-    public function index()
-    {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/DelegationController.php',
-        ]);
-    }
 
     /**
      * @Route("/addDelegation",name="add_delegation",methods={"POST"})
@@ -114,21 +91,35 @@ class DelegationController extends AbstractController
 
     /**
      * @Route("/showEmployeeDelegations/{id}", name="show_employee_delegations", methods={"GET"})
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @param int $id
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
      */
-    public function showAllEmployeeDelegations($id, SerializerInterface $serializer)
+    public function showAllEmployeeDelegations(int $id):Response
     {
         $employeeDelegations = $this->delegationRepository->findEmployeeDelegations($id);
-        foreach ($employeeDelegations as $employeeDelegation) {
-            $this->delegationActions->checkDiffTime($employeeDelegation->getStart(), $employeeDelegation->getEnd());
-            $delegateDays = $this->delegationActions->getNumberOfDelegateDays($employeeDelegation->getStart(), $employeeDelegation->getEnd());
-        }
 
+        foreach ($employeeDelegations as &$employeeDelegation) {
+            $employeeDelegation = (object)$employeeDelegation;
+
+
+            $isDelegateLongerThanEightHours = $this->delegationActions->checkDiffTime($employeeDelegation->start, $employeeDelegation->end);
+            $delegateDays = $this->delegationActions->getNumberOfDelegateDays($employeeDelegation->start, $employeeDelegation->end);
+
+            if ($isDelegateLongerThanEightHours == true) {
+                if ($delegateDays > 7) {
+                    $countCalendarDaysDelegation = $this->delegationActions->countCalendarDaysDelegation($employeeDelegation->start, $employeeDelegation->end);
+                    $employeeDelegation->amountDoe = $this->delegationActions->calculateDoeAmountDelegation($countCalendarDaysDelegation, $employeeDelegation->amountDoe);
+                }
+            }
+            $employeeDelegation->start = $this->delegationActions->formatDate($employeeDelegation->start);
+            $employeeDelegation->end = $this->delegationActions->formatDate($employeeDelegation->end);
+        }
+        $employeeDelegationsJson = $this->serializer->serialize($employeeDelegations, 'json');
 
         try {
-
-
-            return $this->json($employeeDelegations, 200, [], ['groups' => "d"]);
+            $response = new Response($employeeDelegationsJson);
+            $response->headers->set('Content-Type', 'application/json');
+            return $response;
         } catch (\Exception $valueException) {
             return $this->json(['status' => 400, 'message' => $valueException->getMessage()], 400);
         }
