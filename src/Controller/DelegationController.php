@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @Route("/api")
@@ -30,7 +31,7 @@ class DelegationController extends AbstractController
     private $delegationRepository;
 
 
-    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, ApiDelegationActions $delegationActions, DelegationRepository $delegationRepository , SerializerInterface $serializer)
+    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, ApiDelegationActions $delegationActions, DelegationRepository $delegationRepository, SerializerInterface $serializer)
     {
         $this->em = $em;
         $this->validator = $validator;
@@ -92,9 +93,9 @@ class DelegationController extends AbstractController
     /**
      * @Route("/showEmployeeDelegations/{id}", name="show_employee_delegations", methods={"GET"})
      * @param int $id
-     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
+     * @return JsonResponse
      */
-    public function showAllEmployeeDelegations(int $id):Response
+    public function showAllEmployeeDelegations(int $id): JsonResponse
     {
         $employeeDelegations = $this->delegationRepository->findEmployeeDelegations($id);
 
@@ -117,9 +118,7 @@ class DelegationController extends AbstractController
         $employeeDelegationsJson = $this->serializer->serialize($employeeDelegations, 'json');
 
         try {
-            $response = new Response($employeeDelegationsJson);
-            $response->headers->set('Content-Type', 'application/json');
-            return $response;
+            return $this->json(json_decode($employeeDelegationsJson), 200);
         } catch (\Exception $valueException) {
             return $this->json(['status' => 400, 'message' => $valueException->getMessage()], 400);
         }
