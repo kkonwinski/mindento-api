@@ -116,14 +116,16 @@ class DelegationController extends AbstractController
      * @Route("/showEmployeeDelegations/{id}", name="show_employee_delegations", methods={"GET"})
      * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      */
-    public function showAllEmployeeDelegations($id,SerializerInterface $serializer)
+    public function showAllEmployeeDelegations($id, SerializerInterface $serializer)
     {
-        $employeeDelegations = $this->delegationRepository->findBy(["employee" => $id]);
+        $employeeDelegations = $this->delegationRepository->findEmployeeDelegations($id);
+        foreach ($employeeDelegations as $employeeDelegation) {
+            $this->delegationActions->checkDiffTime($employeeDelegation->getStart(), $employeeDelegation->getEnd());
+            $delegateDays = $this->delegationActions->getNumberOfDelegateDays($employeeDelegation->getStart(), $employeeDelegation->getEnd());
+        }
 
-foreach ($employeeDelegations as $employeeDelegation){
-    $this->delegationActions->checkDiffTime($employeeDelegation->getStart(), $employeeDelegation->getEnd());
-}
-try {
+
+        try {
 
 
             return $this->json($employeeDelegations, 200, [], ['groups' => "d"]);

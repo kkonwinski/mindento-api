@@ -54,24 +54,30 @@ class ApiDelegationActions
         $startTime->format('Y-m-d H:i:s');
         $endTime->format('Y-m-d H:i:s');
         $dateDiff = date_diff($startTime, $endTime);
-        $dayInHours=$dateDiff->days * 24;
-        $hours=$dateDiff->h;
-$delegateTime=$dayInHours+$hours;
+        $dayInHours = $dateDiff->days * 24;
+        $hours = $dateDiff->h;
+        $delegateTime = $dayInHours + $hours;
         if ($delegateTime < 8) {
             return true;
         }
 
     }
 
-    private function getNumberOfWeekendDays(\DateTimeInterface $startDate, \DateTimeInterface $endDate): int
+    public function getNumberOfDelegateDays(\DateTimeInterface $startDate, \DateTimeInterface $endDate)
     {
-        $startNumber = (int) $startDate->format('N');
-        $endNumber = (int) $endDate->format('N');
-        $daysBetweenStartAndEnd = $endDate->diff($startDate)->d;
+        $startNumber = (int)$startDate->format('N');
+        $endNumber = (int)$endDate->format('N');
 
-        $weekendDays = (int) (2 * ($daysBetweenStartAndEnd + $startNumber) / 7);
-        $weekendDays = $weekendDays - ($startNumber == 7 ? 1 : 0) - ($endNumber == 7 ?  1 :  0);
+        $daysBetweenStartAndEnd = $endDate->diff($startDate)->days;
 
-        return $weekendDays;
+        $weekendDays = (int)round($daysBetweenStartAndEnd / 7) * 2;
+
+        $weekendDays = $weekendDays - ($startNumber == 7 ? 1 : 0) - ($endNumber == 7 ? 1 : 0);
+        return $this->getDelegateNumberDaysWithoutWeekend($daysBetweenStartAndEnd, $weekendDays);
+    }
+
+    public function getDelegateNumberDaysWithoutWeekend(int $delegateDays, int $weekendDays): int
+    {
+        return $delegateDays - $weekendDays;
     }
 }

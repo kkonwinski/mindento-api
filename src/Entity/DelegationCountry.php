@@ -31,7 +31,6 @@ class DelegationCountry
 
     /**
      * @ORM\Column(type="integer")
-     * @Groups("d")
      */
     private $amountDoe;
 
