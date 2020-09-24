@@ -15,7 +15,7 @@ class Delegation
 {
     public function __construct()
     {
-        $this->setIsFinish(false);
+        $this->setIsFinish(true);
     }
 
     /**

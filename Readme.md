@@ -1,7 +1,8 @@
 URL wejsciowe:
 1. tworzenie nowego pracownika:
 <br><b>localhost:8000/api/addDelegation/addEmployee</b>
-
+<br>
+Przy uruchomieniu wysyłki POST trzeba ustawić puste body z klamrami <b>{}</b> !!!
 2. tworzenie nowej delegacji:
 <br>
 <b>localhost:8000/api/addDelegation

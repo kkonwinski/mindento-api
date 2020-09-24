@@ -40,7 +40,7 @@ class DelegationRepository extends ServiceEntityRepository
     public function findEmployeeOnDelegation($value)
     {
         return $this->createQueryBuilder('d')
-            ->andWhere('d.isFinish=false')
+            ->andWhere('d.isFinish=true')
             ->andWhere('d.employee = :employee')
             ->setParameter('employee', $value)
             ->getQuery()
