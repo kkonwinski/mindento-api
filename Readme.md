@@ -21,7 +21,6 @@ dane wejsciowe
 <br>
 <b>localhost:8000/api/showEmployeeDelegations/{employeeId}</b>
 
-4. Podczas tworzenia nowego uzytkownika dymyślnie ustawiona jest wartość false. Uwzględniłem taką funkcje ponieważ może pracownik mieć delegacje za w czasie późniejszym bądź gdy delegacja jest nie jest w 100% pewna. Wystarczy zmienić albo w bazie albo w konstruktorze encji wartość z false na true.
 
 
 
