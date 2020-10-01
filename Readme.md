@@ -33,11 +33,11 @@ dane wejściowe
 3. pokaż wszystkie delegacje dla pracownika
 <br><i>GET</i>
 <b>localhost:8000/api/showEmployeeDelegations/{employeeId}</b>
-
+<br>
 <h3>Instalacja:</h3>
-1. pobrać projekt <b> git clone https://github.com/kkonwinski/mindento-api.git </b>
-2. przejść do katalogu projektu wykonać komendę <b>composer install</b>
-3. <b>php bin/console make:migration</b>
+1. pobrać projekt <b> git clone https://github.com/kkonwinski/mindento-api.git </b><br>
+2. przejść do katalogu projektu wykonać komendę <b>composer install</b><br>
+3. <b>php bin/console make:migration</b><br>
 4. <b>php bin/console doctrine:migrations:migrate</b>
-5. mozna zamiast pkt. 3 i 4 <b>php bin/console doctrine:schema:update --force</b>
-5. <b>symfony server:start</b> lub w katalogu <i>/public</i> <b>php -S localhost:8000
+5. mozna zamiast pkt. 3 i 4 <b>php bin/console doctrine:schema:update --force</b><br>
+5. <b>symfony server:start</b> lub w katalogu <i>/public</i> <b>php -S localhost:8000<br>
