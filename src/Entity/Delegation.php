@@ -44,7 +44,7 @@ class Delegation
      * @Assert\NotBlank
      * @Groups("d")
      */
-    private $country;
+    private $delegationCountry;
 
     /**
      * @ORM\ManyToOne(targetEntity=Employee::class, inversedBy="delegations")
@@ -120,15 +120,17 @@ class Delegation
         return \DateTime::createFromFormat('Y-m-d H:i:s', $time);
     }
 
-    public function getCountry(): ?DelegationCountry
+    public function getDelegationCountry(): ?DelegationCountry
     {
-        return $this->country;
+        return $this->delegationCountry;
     }
 
-    public function setCountry(?DelegationCountry $country): self
+    public function setDelegationCountry(?DelegationCountry $delegationCountry): self
     {
-        $this->country = $country;
+        $this->delegationCountry = $delegationCountry;
 
         return $this;
     }
+
+
 }

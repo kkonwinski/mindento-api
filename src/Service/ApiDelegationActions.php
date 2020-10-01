@@ -3,11 +3,9 @@
 
 namespace App\Service;
 
-
 use App\Entity\Employee;
 use App\Repository\DelegationRepository;
 use JsonException;
-
 
 class ApiDelegationActions
 {
@@ -31,7 +29,6 @@ class ApiDelegationActions
         if (strtotime($startTime) > strtotime($endTime)) {
             throw new JsonException('Start date is bigger or equal end time!!!', 500);
         }
-
     }
 
     /**
@@ -60,7 +57,6 @@ class ApiDelegationActions
         if ($delegateTime > 8) {
             return true;
         }
-
     }
 
     public function getNumberOfDelegateDays(\DateTimeInterface $startDate, \DateTimeInterface $endDate)
@@ -86,13 +82,13 @@ class ApiDelegationActions
         return $endDate->diff($startDate)->days;
     }
 
-    public function calculateDoeAmountDelegation($calendarDays,$amountDoe)
+    public function calculateDoeAmountDelegation($calendarDays, $amountDoe)
     {
         return $calendarDays + (($calendarDays - 7) * $amountDoe * 2);
     }
     
-    public function formatDate($date){
+    public function formatDate($date)
+    {
         return $date->format('Y-m-d H:i:s');
-
     }
 }

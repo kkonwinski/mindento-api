@@ -45,20 +45,17 @@ class DelegationRepository extends ServiceEntityRepository
             ->setParameter('employee', $value)
             ->getQuery()
             ->getResult();
-
     }
 
     public function findEmployeeDelegations($value)
     {
         return $this->createQueryBuilder('d')
-            ->select('d.start','d.end')
-            ->addSelect('c.country','c.amountDoe','c.currency')
+            ->select('d.start', 'd.end')
+            ->addSelect('c.country', 'c.amountDoe', 'c.currency')
             ->andWhere('d.employee = :employee')
             ->setParameter('employee', $value)
-            ->leftJoin('d.country', 'c')
+            ->leftJoin('d.delegationCountry', 'c')
             ->getQuery()
             ->getResult();
-
     }
-
 }
