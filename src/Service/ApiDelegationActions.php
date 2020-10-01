@@ -5,6 +5,7 @@ namespace App\Service;
 
 use App\Entity\Employee;
 use App\Repository\DelegationRepository;
+use DateTime;
 use JsonException;
 
 class ApiDelegationActions
@@ -17,6 +18,33 @@ class ApiDelegationActions
         $this->delegationRepository = $delegationRepository;
     }
 
+
+    /**
+     * @param array $employeeDelegations
+     * @return array
+     */
+
+    public function getDelegateData(array $employeeDelegations): array
+    {
+        foreach ($employeeDelegations as &$employeeDelegation) {
+            $employeeDelegation = (object)$employeeDelegation;
+            $startDate = $employeeDelegation->start;
+            $endDate = $employeeDelegation->end;
+            $isDelegateLongerThanEightHours = $this->checkDiffTime($startDate, $endDate);
+            $delegateDays = $this->getNumberOfDelegateDays($startDate, $endDate);
+
+            if ($isDelegateLongerThanEightHours == true && $delegateDays > 7) {
+                $countCalendarDaysDelegation = $this->countCalendarDaysDelegation($startDate, $endDate);
+
+                $employeeDelegation->amountDoe = $this->calculateDoeAmountDelegation($countCalendarDaysDelegation, $employeeDelegation->amountDoe);
+            }
+            $employeeDelegation->start = $this->formatDate($startDate);
+            $employeeDelegation->end = $this->formatDate($endDate);
+        }
+        return $employeeDelegations;
+    }
+
+
     /**
      * @param string $startTime
      * @param string $endTime
@@ -24,32 +52,30 @@ class ApiDelegationActions
      */
     public function compareDelegationTimes(string $startTime, string $endTime)
     {
-
-
-        if (strtotime($startTime) > strtotime($endTime)) {
-            throw new JsonException('Start date is bigger or equal end time!!!', 500);
-        }
+        strtotime($startTime) > strtotime($endTime) ?: $this->setJsonException('Start date is bigger or equal end time!!!', 500);
     }
+
 
     /**
      * @param Employee $employee
      * @return bool
      * @throws JsonException
      */
-    public function isEmployeeOnDelegation(Employee $employee)
+    public function isEmployeeOnDelegation(Employee $employee): bool
     {
         $isEmployeeOnDelegation = $this->delegationRepository->findEmployeeOnDelegation($employee);
-        if (empty($isEmployeeOnDelegation)) {
-            return true;
-        } else {
-            throw new JsonException('Employee is actually on delegation', 500);
-        }
+        empty($isEmployeeOnDelegation) ? true : $this->setJsonException('Employee is actually on delegation', 500);
     }
 
-    public function checkDiffTime($startTime, $endTime)
+    /**
+     * @param DateTime $startTime
+     * @param DateTime $endTime
+     * @return bool
+     */
+    public function checkDiffTime(DateTime $startTime, DateTime $endTime): bool
     {
-        $startTime->format('Y-m-d H:i:s');
-        $endTime->format('Y-m-d H:i:s');
+        $this->formatDate($startTime);
+        $this->formatDate($endTime);
         $dateDiff = date_diff($startTime, $endTime);
         $dayInHours = $dateDiff->days * 24;
         $hours = $dateDiff->h;
@@ -59,10 +85,10 @@ class ApiDelegationActions
         }
     }
 
-    public function getNumberOfDelegateDays(\DateTimeInterface $startDate, \DateTimeInterface $endDate)
+    public function getNumberOfDelegateDays(DateTime $startDate, DateTime $endDate)
     {
-        $startNumber = (int)$startDate->format('Y-m-d H:i:s');
-        $endNumber = (int)$endDate->format('Y-m-d H:i:s');
+        $startNumber = (int)$this->formatDate($startDate);
+        $endNumber = (int)$this->formatDate($endDate);
         $daysBetweenStartAndEnd = $this->countCalendarDaysDelegation($startDate, $endDate);
 
         $weekendDays = (int)round($daysBetweenStartAndEnd / 7) * 2;
@@ -86,9 +112,26 @@ class ApiDelegationActions
     {
         return $calendarDays + (($calendarDays - 7) * $amountDoe * 2);
     }
-    
-    public function formatDate($date)
+
+
+    /**
+     * @param DateTime $date
+     * @return string
+     */
+    public function formatDate(DateTime $date)
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+
+    /**
+     * @param string $content
+     * @param int $code
+     * @return JsonException
+     * @throws JsonException
+     */
+    public function setJsonException(string $content, int $code): JsonException
+    {
+        throw new JsonException(sprintf('%s', $content), $code);
     }
 }

@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -31,8 +30,15 @@ class DelegationController extends AbstractController
     private $delegationRepository;
 
 
-    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, EmployeeRepository $employeeRepository, DelegationCountryRepository $delegationCountryRepository, ApiDelegationActions $delegationActions, DelegationRepository $delegationRepository, SerializerInterface $serializer)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        ValidatorInterface $validator,
+        EmployeeRepository $employeeRepository,
+        DelegationCountryRepository $delegationCountryRepository,
+        ApiDelegationActions $delegationActions,
+        DelegationRepository $delegationRepository,
+        SerializerInterface $serializer
+    ) {
         $this->em = $em;
         $this->validator = $validator;
         $this->employeeRepository = $employeeRepository;
@@ -44,11 +50,10 @@ class DelegationController extends AbstractController
 
 
     /**
-     * @Route("/addDelegation",name="add_delegation",methods={"POST"})
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
+     * @return JsonResponse
      */
-    public function add(Request $request)
+    public function add(Request $request): JsonResponse
     {
         try {
             $data = $request->getContent();
@@ -72,8 +77,6 @@ class DelegationController extends AbstractController
             return $this->json([
                 'message' => 'Delegate created!!!'
             ], 201);
-
-
         } catch (\Exception $valueException) {
             return $this->json(['status' => 400, 'message' => $valueException->getMessage()], 400);
         }
@@ -98,24 +101,9 @@ class DelegationController extends AbstractController
     public function showAllEmployeeDelegations(int $id): JsonResponse
     {
         $employeeDelegations = $this->delegationRepository->findEmployeeDelegations($id);
+        $delegationData = $this->delegationActions->getDelegateData($employeeDelegations);
 
-        foreach ($employeeDelegations as &$employeeDelegation) {
-            $employeeDelegation = (object)$employeeDelegation;
-
-
-            $isDelegateLongerThanEightHours = $this->delegationActions->checkDiffTime($employeeDelegation->start, $employeeDelegation->end);
-            $delegateDays = $this->delegationActions->getNumberOfDelegateDays($employeeDelegation->start, $employeeDelegation->end);
-
-            if ($isDelegateLongerThanEightHours == true) {
-                if ($delegateDays > 7) {
-                    $countCalendarDaysDelegation = $this->delegationActions->countCalendarDaysDelegation($employeeDelegation->start, $employeeDelegation->end);
-                    $employeeDelegation->amountDoe = $this->delegationActions->calculateDoeAmountDelegation($countCalendarDaysDelegation, $employeeDelegation->amountDoe);
-                }
-            }
-            $employeeDelegation->start = $this->delegationActions->formatDate($employeeDelegation->start);
-            $employeeDelegation->end = $this->delegationActions->formatDate($employeeDelegation->end);
-        }
-        $employeeDelegationsJson = $this->serializer->serialize($employeeDelegations, 'json');
+        $employeeDelegationsJson = $this->serializer->serialize($delegationData, 'json');
 
         try {
             return $this->json(json_decode($employeeDelegationsJson), 200);
